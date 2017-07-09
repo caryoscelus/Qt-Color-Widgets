@@ -109,6 +109,18 @@ public:
      */
     void setDisplayFlag(DisplayFlags flag, DisplayFlags mask);
 
+    /// Clear harmony color scheme
+    void clearHarmonies();
+
+    /**
+     * @brief Add harmony color
+     * @param hue_diff     Initial hue difference (in [0-1) range)
+     * @param editable     Whether this harmony should be editable
+     * @param symmetric_to Index of other harmony that should symmetric relative to main hue (or -1 for none)
+     * @param opposite_to  Index of other harmony that should be opposite to this (or -1)
+     */
+    void addHarmony(double hue_diff, bool editable, int symmetric_to=-1, int opposite_to=-1);
+
 public Q_SLOTS:
 
     /// Set current color
