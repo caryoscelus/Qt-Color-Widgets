@@ -171,6 +171,8 @@ Color2DSlider::Component Color2DSlider::componentY() const
 
 void Color2DSlider::setColor(const QColor& c)
 {
+    if (c == color())
+        return;
     p->hue = c.hsvHueF();
     p->sat = c.saturationF();
     p->val = c.valueF();

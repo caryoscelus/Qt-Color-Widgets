@@ -547,6 +547,8 @@ void ColorWheel::resizeEvent(QResizeEvent *)
 
 void ColorWheel::setColor(QColor c)
 {
+    if (c == color())
+        return;
     qreal oldh = p->hue;
     p->set_color(c);
     if (!qFuzzyCompare(oldh+1, p->hue+1))
