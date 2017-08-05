@@ -30,6 +30,7 @@
 
 #include "color_wheel.hpp"
 #include "color_2d_slider.hpp"
+#include "hue_slider.hpp"
 #include "advanced_color_selector.hpp"
 
 namespace color_widgets {
@@ -40,11 +41,13 @@ public:
     Private(AdvancedColorSelector* parent) :
         wheel(new ColorWheel()),
         rectangle(new Color2DSlider()),
+        hue_slider(new HueSlider(Qt::Vertical)),
         harmony_buttons(new QButtonGroup()),
         parent(parent)
     {
         addColorWidget(wheel);
         addColorWidget(rectangle);
+        addColorWidget(hue_slider);
 
         auto harmony_none = newToolButton(
             "media-playback-start",
@@ -120,6 +123,7 @@ public:
 public:
     ColorWheel* wheel;
     Color2DSlider* rectangle;
+    HueSlider* hue_slider;
     QButtonGroup* harmony_buttons;
 private:
     AdvancedColorSelector * const parent;
@@ -182,6 +186,7 @@ AdvancedColorSelector::AdvancedColorSelector(QWidget* parent) :
 
     auto rectangle_layout = new QHBoxLayout();
     rectangle_layout->addWidget(p->rectangle);
+    rectangle_layout->addWidget(p->hue_slider);
     auto rectangle_widget = new QWidget();
     rectangle_widget->setLayout(rectangle_layout);
     tabs_widget->addTab(rectangle_widget, tr("Rectangle"));
