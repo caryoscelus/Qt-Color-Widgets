@@ -28,9 +28,12 @@
 #include <QButtonGroup>
 #include <QDebug>
 
+#include <memory>
+
 #include "color_wheel.hpp"
 #include "color_2d_slider.hpp"
 #include "hue_slider.hpp"
+#include "color_line_edit.hpp"
 #include "advanced_color_selector.hpp"
 
 namespace color_widgets {
@@ -43,6 +46,7 @@ public:
         rectangle(new Color2DSlider()),
         hue_slider(new HueSlider(Qt::Vertical)),
         harmony_buttons(new QButtonGroup()),
+        wheel_layout(new QVBoxLayout()),
         parent(parent)
     {
         addColorWidget(wheel);
@@ -53,6 +57,7 @@ public:
             "media-playback-start",
             [this]() {
                 wheel->clearHarmonies();
+                updateColors();
             }
         );
         harmony_none->setChecked(true);
@@ -65,6 +70,7 @@ public:
                 [this]() {
                     wheel->clearHarmonies();
                     wheel->addHarmony(0.5, false);
+                    updateColors();
                 }
             )
         );
@@ -75,9 +81,12 @@ public:
                     wheel->clearHarmonies();
                     auto a = wheel->addHarmony(0.125, true);
                     wheel->addSymmetricHarmony(a);
+                    updateColors();
                 }
             )
         );
+        connect(wheel, &ColorWheel::harmonyChanged, this, &Private::updateColors);
+        updateColors();
     }
     ~Private() = default;
 public:
@@ -118,14 +127,39 @@ public:
             widget->blockSignals(oldState);
         }
     }
+    void updateColors() {
+        auto count = wheel->harmonyCount();
+        auto colors = wheel->harmonyColors();
+        if (harmony_colors_layout == nullptr || (unsigned) harmony_colors_layout->count() != count) {
+            harmony_colors_widget.reset(new QWidget());
+            harmony_colors_layout = new QHBoxLayout();
+            harmony_colors_widget->setLayout(harmony_colors_layout);
+            harmony_colors_widget->setMaximumHeight(32);
+            wheel_layout->addWidget(harmony_colors_widget.get());
+            while ((unsigned)harmony_colors_layout->count() < count)
+                harmony_colors_layout->addWidget(new color_widgets::ColorLineEdit());
+        }
+        for (unsigned i = 0; i < count; ++i) {
+            if (auto item = harmony_colors_layout->itemAt(i)) {
+                if (auto widget = dynamic_cast<color_widgets::ColorLineEdit*>(item->widget())) {
+                    widget->setPreviewColor(true);
+                    widget->setColor(colors[i]);
+                    widget->setReadOnly(true);
+                }
+            }
+        }
+    }
 public:
     ColorWheel* wheel;
     Color2DSlider* rectangle;
     HueSlider* hue_slider;
     QButtonGroup* harmony_buttons;
+    QVBoxLayout* wheel_layout;
 private:
     AdvancedColorSelector * const parent;
     QVector<QObject*> widgets;
+    std::unique_ptr<QWidget> harmony_colors_widget = nullptr;
+    QHBoxLayout* harmony_colors_layout = nullptr;
 };
 
 AdvancedColorSelector::AdvancedColorSelector(QWidget* parent) :
@@ -137,9 +171,8 @@ AdvancedColorSelector::AdvancedColorSelector(QWidget* parent) :
     auto tabs_widget = new QTabWidget();
     main_layout->addWidget(tabs_widget);
 
-    auto wheel_layout = new QVBoxLayout();
     auto wheel_widget = new QWidget();
-    wheel_widget->setLayout(wheel_layout);
+    wheel_widget->setLayout(p->wheel_layout);
 //     wheel_widget->installEventFilter(p.data());
 
     auto form_button = new QToolButton(/*wheel_widget*/);
@@ -172,8 +205,8 @@ AdvancedColorSelector::AdvancedColorSelector(QWidget* parent) :
     auto harmony_widget = new QWidget();
     harmony_widget->setLayout(harmony_layout);
 
-    wheel_layout->addWidget(harmony_widget);
-    wheel_layout->addWidget(p->wheel, 1.0);
+    p->wheel_layout->addWidget(harmony_widget);
+    p->wheel_layout->addWidget(p->wheel, 1.0);
 
     tabs_widget->addTab(wheel_widget, tr("Wheel"));
 
