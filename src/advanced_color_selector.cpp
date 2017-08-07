@@ -96,12 +96,10 @@ public:
      */
     void addColorWidget(QObject* widget) {
         widgets.push_back(widget);
-//         connect(parent, SIGNAL(colorChanged(QColor)), widget, SLOT(setColor(QColor)));
         connect(widget, SIGNAL(colorChanged(QColor)), parent, SIGNAL(colorChanged(QColor)));
     }
     void removeColorWidget(QObject* widget) {
         widgets.removeAll(widget);
-//         disconnect(parent, SIGNAL(colorChanged(QColor)), widget, SLOT(setColor(QColor)));
         disconnect(widget, SIGNAL(colorChanged(QColor)), parent, SIGNAL(colorChanged(QColor)));
     }
     template <typename F>
@@ -161,14 +159,9 @@ AdvancedColorSelector::AdvancedColorSelector(QWidget* parent) :
     });
     form_button->setChecked(true);
 
-    
     auto harmony_none = new QToolButton(/*wheel_widget*/);
     harmony_none->setCheckable(true);
     harmony_none->resize(32, 32);
-
-//     auto harmony_complementary = new QToolButton(/*wheel_widget*/);
-//     harmony_complementary->setCheckable(true);
-//     harmony_complementary->resize(32, 32);
 
     auto harmony_layout = new QHBoxLayout();
     harmony_layout->addWidget(form_button);
