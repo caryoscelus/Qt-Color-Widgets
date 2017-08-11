@@ -39,6 +39,9 @@ public:
     explicit AdvancedColorSelector(QWidget* parent = nullptr);
     ~AdvancedColorSelector();
 
+public:
+    QColor color() const;
+
 public Q_SLOTS:
     void setColor(QColor c);
 

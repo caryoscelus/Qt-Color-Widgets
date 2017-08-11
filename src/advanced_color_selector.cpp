@@ -133,19 +133,24 @@ public:
 
         parent->setLayout(main_layout);
 
-        connect(parent, SIGNAL(colorChanged(QColor)), parent, SLOT(setColor(QColor)));
         connect(wheel, &ColorWheel::harmonyChanged, this, &Private::updateColors);
         harmony_none->setChecked(true);
     }
     ~Private() = default;
 public:
-//     bool eventFilter(QObject* object, QEvent* event) override {
-//         if (event->type() == QEvent::Resize)
-//         {
-//             qDebug() << "resized";
-//         }
-//         return false;
-//     }
+    bool eventFilter(QObject* object, QEvent* event) override {
+        if (auto harmony_widget = dynamic_cast<ColorLineEdit*>(object))
+        {
+            if (event->type() == QEvent::MouseButtonPress)
+            {
+                int i = harmony_colors_widgets.indexOf(harmony_widget);
+                if (i == -1)
+                    return false;
+                setHarmony(i);
+            }
+        }
+        return false;
+    }
 public:
     /**
      * Adds color widget with proper signals & slots
@@ -154,11 +159,11 @@ public:
      */
     void addColorWidget(QObject* widget) {
         widgets.push_back(widget);
-        connect(widget, SIGNAL(colorChanged(QColor)), parent, SIGNAL(colorChanged(QColor)));
+        connect(widget, SIGNAL(colorChanged(QColor)), parent, SLOT(setColor(QColor)));
     }
     void removeColorWidget(QObject* widget) {
         widgets.removeAll(widget);
-        disconnect(widget, SIGNAL(colorChanged(QColor)), parent, SIGNAL(colorChanged(QColor)));
+        disconnect(widget, SIGNAL(colorChanged(QColor)), parent, SLOT(setColor(QColor)));
     }
     template <typename F>
     QToolButton* newToolButton(QString icon, F callback) const {
@@ -172,7 +177,7 @@ public:
     void setColor(QColor c) {
         for (auto widget : widgets) {
             auto oldState = widget->blockSignals(true);
-            QMetaObject::invokeMethod(widget, "setColor", Q_ARG(QColor, c));
+            QMetaObject::invokeMethod(widget, "setColor", Qt::DirectConnection, Q_ARG(QColor, c));
             widget->blockSignals(oldState);
         }
     }
@@ -186,17 +191,29 @@ public:
             harmony_colors_widget->setMaximumHeight(32);
             wheel_layout->addWidget(harmony_colors_widget.get());
             while ((unsigned)harmony_colors_layout->count() < count)
-                harmony_colors_layout->addWidget(new color_widgets::ColorLineEdit());
+                harmony_colors_layout->addWidget(new ColorLineEdit());
+            harmony_colors_widgets.clear();
         }
         for (unsigned i = 0; i < count; ++i) {
             if (auto item = harmony_colors_layout->itemAt(i)) {
-                if (auto widget = dynamic_cast<color_widgets::ColorLineEdit*>(item->widget())) {
+                if (auto widget = dynamic_cast<ColorLineEdit*>(item->widget())) {
                     widget->setPreviewColor(true);
                     widget->setColor(colors[i]);
                     widget->setReadOnly(true);
+                    widget->installEventFilter(this);
+                    harmony_colors_widgets.append(widget);
                 }
             }
         }
+    }
+    void setHarmony(int i) {
+        if (i < 0 || i >= (int)wheel->harmonyCount())
+            return;
+        selected_harmony = i;
+        Q_EMIT parent->colorChanged(color());
+    }
+    QColor color() const {
+        return wheel->harmonyColors()[selected_harmony];
     }
 public:
     ColorWheel* wheel;
@@ -209,6 +226,8 @@ private:
     QVector<QObject*> widgets;
     std::unique_ptr<QWidget> harmony_colors_widget = nullptr;
     QHBoxLayout* harmony_colors_layout = nullptr;
+    QVector<QWidget*> harmony_colors_widgets;
+    int selected_harmony = 0;
 };
 
 AdvancedColorSelector::AdvancedColorSelector(QWidget* parent) :
@@ -221,9 +240,18 @@ AdvancedColorSelector::~AdvancedColorSelector()
 {
 }
 
+QColor AdvancedColorSelector::color() const
+{
+    return p->color();
+}
+
 void AdvancedColorSelector::setColor(QColor c)
 {
+    // NOTE: QColors with different models compare unequal!
+    if (c.toRgb() == color().toRgb())
+        return;
     p->setColor(c);
+    Q_EMIT colorChanged(color());
 }
 
 } // namespace color_widgets
