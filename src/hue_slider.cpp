@@ -137,7 +137,9 @@ void HueSlider::setColorHue(qreal colorHue)
     // TODO: consider supporting invertedAppearance?
     if (orientation() == Qt::Vertical)
         colorHue = 1 - colorHue;
-    setValue(minimum()+colorHue*(maximum()-minimum()));
+    auto new_value = minimum()+colorHue*(maximum()-minimum());
+    if (new_value != value())
+        setValue(new_value);
 }
 
 } // namespace color_widgets
