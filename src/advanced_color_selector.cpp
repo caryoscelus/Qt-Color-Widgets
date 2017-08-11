@@ -29,6 +29,7 @@
 #include <QDebug>
 
 #include <memory>
+#include <cmath>
 
 #include "color_wheel.hpp"
 #include "color_2d_slider.hpp"
@@ -159,11 +160,11 @@ public:
      */
     void addColorWidget(QObject* widget) {
         widgets.push_back(widget);
-        connect(widget, SIGNAL(colorChanged(QColor)), parent, SLOT(setColor(QColor)));
+        connect(widget, SIGNAL(colorChanged(QColor)), parent, SLOT(setBaseColor(QColor)));
     }
     void removeColorWidget(QObject* widget) {
         widgets.removeAll(widget);
-        disconnect(widget, SIGNAL(colorChanged(QColor)), parent, SLOT(setColor(QColor)));
+        disconnect(widget, SIGNAL(colorChanged(QColor)), parent, SLOT(setBaseColor(QColor)));
     }
     template <typename F>
     QToolButton* newToolButton(QString icon, F callback) const {
@@ -175,9 +176,14 @@ public:
         return button;
     }
     void setColor(QColor c) {
+        auto baseHue = c.hueF() - color().hueF() + baseColor().hueF();
+        baseHue -= std::floor(baseHue);
+        setBaseColor(QColor::fromHsvF(baseHue, c.saturationF(), c.valueF()));
+    }
+    void setBaseColor(QColor c) {
         for (auto widget : widgets) {
             auto oldState = widget->blockSignals(true);
-            QMetaObject::invokeMethod(widget, "setColor", Qt::DirectConnection, Q_ARG(QColor, c));
+            QMetaObject::invokeMethod(widget, "setColor", Q_ARG(QColor, c));
             widget->blockSignals(oldState);
         }
     }
@@ -190,21 +196,24 @@ public:
             harmony_colors_widget->setLayout(harmony_colors_layout);
             harmony_colors_widget->setMaximumHeight(32);
             wheel_layout->addWidget(harmony_colors_widget.get());
-            while ((unsigned)harmony_colors_layout->count() < count)
-                harmony_colors_layout->addWidget(new ColorLineEdit());
             harmony_colors_widgets.clear();
+            while ((unsigned)harmony_colors_layout->count() < count) {
+                auto widget = new ColorLineEdit();
+                widget->setPreviewColor(true);
+                harmony_colors_layout->addWidget(widget);
+                widget->installEventFilter(this);
+                harmony_colors_widgets.append(widget);
+            }
         }
         for (unsigned i = 0; i < count; ++i) {
             if (auto item = harmony_colors_layout->itemAt(i)) {
                 if (auto widget = dynamic_cast<ColorLineEdit*>(item->widget())) {
-                    widget->setPreviewColor(true);
                     widget->setColor(colors[i]);
                     widget->setReadOnly(true);
-                    widget->installEventFilter(this);
-                    harmony_colors_widgets.append(widget);
                 }
             }
         }
+        Q_EMIT parent->colorChanged(color());
     }
     void setHarmony(int i) {
         if (i < 0 || i >= (int)wheel->harmonyCount())
@@ -213,7 +222,13 @@ public:
         Q_EMIT parent->colorChanged(color());
     }
     QColor color() const {
-        return wheel->harmonyColors()[selected_harmony];
+        auto i = selected_harmony;
+        if (i < 0 || i >= (int)wheel->harmonyCount())
+            i = 0;
+        return wheel->harmonyColors()[i];
+    }
+    QColor baseColor() const {
+        return wheel->color();
     }
 public:
     ColorWheel* wheel;
@@ -248,9 +263,15 @@ QColor AdvancedColorSelector::color() const
 void AdvancedColorSelector::setColor(QColor c)
 {
     // NOTE: QColors with different models compare unequal!
-    if (c.toRgb() == color().toRgb())
+    if (c.toRgb() == p->color().toRgb())
         return;
     p->setColor(c);
+    Q_EMIT colorChanged(color());
+}
+
+void AdvancedColorSelector::setBaseColor(QColor c)
+{
+    p->setBaseColor(c);
     Q_EMIT colorChanged(color());
 }
 
