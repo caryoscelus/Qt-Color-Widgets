@@ -60,7 +60,6 @@ public:
                 updateColors();
             }
         );
-        harmony_none->setChecked(true);
         harmony_buttons->addButton(
             harmony_none
         );
@@ -85,8 +84,58 @@ public:
                 }
             )
         );
+        auto main_layout = new QVBoxLayout();
+
+        auto tabs_widget = new QTabWidget();
+        main_layout->addWidget(tabs_widget);
+
+        auto wheel_widget = new QWidget();
+        wheel_widget->setLayout(wheel_layout);
+//         wheel_widget->installEventFilter(p.data());
+
+        auto form_button = new QToolButton(/*wheel_widget*/);
+        form_button->setCheckable(true);
+        form_button->resize(32, 32);
+        connect(form_button, &QToolButton::toggled, [this, form_button](bool square) {
+            if (square)
+            {
+                form_button->setIcon(QIcon::fromTheme("draw-triangle3"));
+                wheel->setDisplayFlags(ColorWheel::SHAPE_SQUARE | ColorWheel::ANGLE_FIXED);
+            }
+            else
+            {
+                form_button->setIcon(QIcon::fromTheme("draw-rectangle"));
+                wheel->setDisplayFlags(ColorWheel::SHAPE_TRIANGLE | ColorWheel::ANGLE_ROTATING);
+            }
+        });
+        form_button->setChecked(true);
+
+        auto harmony_layout = new QHBoxLayout();
+        harmony_layout->addWidget(form_button);
+
+        for (auto button : harmony_buttons->buttons())
+            harmony_layout->addWidget(button);
+
+        auto harmony_widget = new QWidget();
+        harmony_widget->setLayout(harmony_layout);
+
+        wheel_layout->addWidget(harmony_widget);
+        wheel_layout->addWidget(wheel, 1.0);
+
+        tabs_widget->addTab(wheel_widget, tr("Wheel"));
+
+        auto rectangle_layout = new QHBoxLayout();
+        rectangle_layout->addWidget(rectangle);
+        rectangle_layout->addWidget(hue_slider);
+        auto rectangle_widget = new QWidget();
+        rectangle_widget->setLayout(rectangle_layout);
+        tabs_widget->addTab(rectangle_widget, tr("Rectangle"));
+
+        parent->setLayout(main_layout);
+
+        connect(parent, SIGNAL(colorChanged(QColor)), parent, SLOT(setColor(QColor)));
         connect(wheel, &ColorWheel::harmonyChanged, this, &Private::updateColors);
-        updateColors();
+        harmony_none->setChecked(true);
     }
     ~Private() = default;
 public:
@@ -166,60 +215,6 @@ AdvancedColorSelector::AdvancedColorSelector(QWidget* parent) :
     QWidget(parent),
     p(new Private(this))
 {
-    auto main_layout = new QVBoxLayout();
-
-    auto tabs_widget = new QTabWidget();
-    main_layout->addWidget(tabs_widget);
-
-    auto wheel_widget = new QWidget();
-    wheel_widget->setLayout(p->wheel_layout);
-//     wheel_widget->installEventFilter(p.data());
-
-    auto form_button = new QToolButton(/*wheel_widget*/);
-    form_button->setCheckable(true);
-    form_button->resize(32, 32);
-    connect(form_button, &QToolButton::toggled, [this, form_button](bool square) {
-        if (square)
-        {
-            form_button->setIcon(QIcon::fromTheme("draw-triangle3"));
-            p->wheel->setDisplayFlags(ColorWheel::SHAPE_SQUARE | ColorWheel::ANGLE_FIXED);
-        }
-        else
-        {
-            form_button->setIcon(QIcon::fromTheme("draw-rectangle"));
-            p->wheel->setDisplayFlags(ColorWheel::SHAPE_TRIANGLE | ColorWheel::ANGLE_ROTATING);
-        }
-    });
-    form_button->setChecked(true);
-
-    auto harmony_none = new QToolButton(/*wheel_widget*/);
-    harmony_none->setCheckable(true);
-    harmony_none->resize(32, 32);
-
-    auto harmony_layout = new QHBoxLayout();
-    harmony_layout->addWidget(form_button);
-
-    for (auto button : p->harmony_buttons->buttons())
-        harmony_layout->addWidget(button);
-
-    auto harmony_widget = new QWidget();
-    harmony_widget->setLayout(harmony_layout);
-
-    p->wheel_layout->addWidget(harmony_widget);
-    p->wheel_layout->addWidget(p->wheel, 1.0);
-
-    tabs_widget->addTab(wheel_widget, tr("Wheel"));
-
-    auto rectangle_layout = new QHBoxLayout();
-    rectangle_layout->addWidget(p->rectangle);
-    rectangle_layout->addWidget(p->hue_slider);
-    auto rectangle_widget = new QWidget();
-    rectangle_widget->setLayout(rectangle_layout);
-    tabs_widget->addTab(rectangle_widget, tr("Rectangle"));
-
-    setLayout(main_layout);
-
-    connect(this, SIGNAL(colorChanged(QColor)), this, SLOT(setColor(QColor)));
 }
 
 AdvancedColorSelector::~AdvancedColorSelector()
