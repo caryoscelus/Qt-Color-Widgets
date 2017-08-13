@@ -197,7 +197,8 @@ public:
             harmony_colors_widget->setMaximumHeight(32);
             wheel_layout->addWidget(harmony_colors_widget.get());
             harmony_colors_widgets.clear();
-            while ((unsigned)harmony_colors_layout->count() < count) {
+            while (count--)
+            {
                 auto widget = new ColorLineEdit();
                 widget->setPreviewColor(true);
                 harmony_colors_layout->addWidget(widget);
@@ -205,19 +206,18 @@ public:
                 harmony_colors_widgets.append(widget);
             }
         }
-        for (unsigned i = 0; i < count; ++i) {
-            if (auto item = harmony_colors_layout->itemAt(i)) {
-                if (auto widget = dynamic_cast<ColorLineEdit*>(item->widget())) {
-                    widget->setColor(colors[i]);
-                    widget->setReadOnly(true);
-                }
-            }
+        unsigned i = 0;
+        for (auto widget : harmony_colors_widgets)
+        {
+            widget->setColor(colors[i]);
+            widget->setReadOnly(true);
+            ++i;
         }
         Q_EMIT parent->colorChanged(color());
     }
     void setHarmony(int i) {
         if (i < 0 || i >= (int)wheel->harmonyCount())
-            return;
+            i = 0;
         selected_harmony = i;
         Q_EMIT parent->colorChanged(color());
     }
@@ -241,7 +241,7 @@ private:
     QVector<QObject*> widgets;
     std::unique_ptr<QWidget> harmony_colors_widget = nullptr;
     QHBoxLayout* harmony_colors_layout = nullptr;
-    QVector<QWidget*> harmony_colors_widgets;
+    QVector<ColorLineEdit*> harmony_colors_widgets;
     int selected_harmony = 0;
 };
 
