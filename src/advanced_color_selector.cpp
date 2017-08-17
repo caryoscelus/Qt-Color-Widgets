@@ -136,6 +136,7 @@ public:
 
         connect(wheel, &ColorWheel::harmonyChanged, this, &Private::updateColors);
         harmony_none->setChecked(true);
+        setHarmony(0);
     }
     ~Private() = default;
 public:
@@ -219,6 +220,12 @@ public:
         if (i < 0 || i >= (int)wheel->harmonyCount())
             i = 0;
         selected_harmony = i;
+        int j = 0;
+        for (auto widget : harmony_colors_widgets)
+        {
+            widget->setStyleSheet(j == selected_harmony ? "font-weight: bold" : "");
+            ++j;
+        }
         Q_EMIT parent->colorChanged(color());
     }
     QColor color() const {
