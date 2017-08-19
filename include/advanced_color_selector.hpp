@@ -45,6 +45,7 @@ public:
 public Q_SLOTS:
     void setColor(QColor c);
     void setBaseColor(QColor c);
+    void setHarmony(unsigned harmony);
 
 Q_SIGNALS:
     void colorChanged(QColor);
