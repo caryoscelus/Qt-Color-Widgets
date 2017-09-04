@@ -35,6 +35,7 @@
 #include "color_2d_slider.hpp"
 #include "hue_slider.hpp"
 #include "color_line_edit.hpp"
+#include "swatch.hpp"
 #include "advanced_color_selector.hpp"
 
 namespace color_widgets {
@@ -85,6 +86,7 @@ public:
         wheel(new ColorWheel()),
         rectangle(new Color2DSlider()),
         hue_slider(new HueSlider(Qt::Vertical)),
+        color_history(new Swatch()),
         harmony_buttons(new QButtonGroup()),
         wheel_layout(new QVBoxLayout()),
         parent(parent)
@@ -171,8 +173,15 @@ public:
         rectangle_widget->setLayout(rectangle_layout);
         tabs_widget->addTab(rectangle_widget, tr("Rectangle"));
 
+        main_layout->addWidget(color_history);
+        main_layout->setStretchFactor(tabs_widget, 1);
+        color_history->setForcedColumns(12);
+        color_history->setColorSizePolicy(Swatch::Minimum);
+        color_history->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
         parent->setLayout(main_layout);
 
+        connect(color_history, &Swatch::colorSelected, this, &Private::setColor);
         connect(wheel, &ColorWheel::harmonyChanged, this, &Private::updateColors);
         harmony_none->setChecked(true);
         setHarmony(0);
@@ -265,6 +274,7 @@ public:
     ColorWheel* wheel;
     Color2DSlider* rectangle;
     HueSlider* hue_slider;
+    Swatch* color_history;
     QButtonGroup* harmony_buttons;
     QVBoxLayout* wheel_layout;
 private:
@@ -309,6 +319,11 @@ void AdvancedColorSelector::setBaseColor(QColor c)
 void AdvancedColorSelector::setHarmony(unsigned harmony)
 {
     p->setHarmony(harmony);
+}
+
+void AdvancedColorSelector::saveToHistory() {
+    p->color_history->palette().insertColor(0, color());
+    p->color_history->updateGeometry();
 }
 
 } // namespace color_widgets
