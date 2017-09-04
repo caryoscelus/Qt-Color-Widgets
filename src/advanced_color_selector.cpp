@@ -332,7 +332,6 @@ void AdvancedColorSelector::saveToHistory() {
     if (h->palette().colorAt(0) == color())
         return;
     h->palette().insertColor(0, color());
-    h->updateGeometry();
     h->setSelected(0);
 }
 
