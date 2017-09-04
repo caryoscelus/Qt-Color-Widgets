@@ -221,6 +221,7 @@ public:
             QMetaObject::invokeMethod(widget, "setColor", Q_ARG(QColor, c));
             widget->blockSignals(oldState);
         }
+        updateColors();
     }
     void updateColors() {
         auto count = wheel->harmonyCount();
@@ -246,6 +247,9 @@ public:
             widget->setReadOnly(true);
             widget->setSelected((int)i == selected_harmony);
             ++i;
+        }
+        if (color() != color_history->selectedColor()) {
+            color_history->setSelected(-1);
         }
         Q_EMIT parent->colorChanged(color());
     }
@@ -324,6 +328,7 @@ void AdvancedColorSelector::setHarmony(unsigned harmony)
 void AdvancedColorSelector::saveToHistory() {
     p->color_history->palette().insertColor(0, color());
     p->color_history->updateGeometry();
+    p->color_history->setSelected(0);
 }
 
 } // namespace color_widgets
