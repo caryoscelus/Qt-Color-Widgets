@@ -182,6 +182,11 @@ public:
         parent->setLayout(main_layout);
 
         connect(color_history, &Swatch::colorSelected, this, &Private::setColor);
+        connect(parent, &AdvancedColorSelector::colorChanged, [this]() {
+            if (color() != color_history->selectedColor()) {
+                color_history->setSelected(-1);
+            }
+        });
         connect(wheel, &ColorWheel::harmonyChanged, this, &Private::updateColors);
         harmony_none->setChecked(true);
         setHarmony(0);
@@ -247,9 +252,6 @@ public:
             widget->setReadOnly(true);
             widget->setSelected((int)i == selected_harmony);
             ++i;
-        }
-        if (color() != color_history->selectedColor()) {
-            color_history->setSelected(-1);
         }
         Q_EMIT parent->colorChanged(color());
     }
@@ -326,9 +328,12 @@ void AdvancedColorSelector::setHarmony(unsigned harmony)
 }
 
 void AdvancedColorSelector::saveToHistory() {
-    p->color_history->palette().insertColor(0, color());
-    p->color_history->updateGeometry();
-    p->color_history->setSelected(0);
+    auto h = p->color_history;
+    if (h->palette().colorAt(0) == color())
+        return;
+    h->palette().insertColor(0, color());
+    h->updateGeometry();
+    h->setSelected(0);
 }
 
 } // namespace color_widgets
