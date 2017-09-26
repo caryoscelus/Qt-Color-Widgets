@@ -36,6 +36,7 @@
 #include "hue_slider.hpp"
 #include "color_line_edit.hpp"
 #include "swatch.hpp"
+#include "component_color_selector.hpp"
 #include "advanced_color_selector.hpp"
 
 namespace color_widgets {
@@ -86,6 +87,7 @@ public:
         wheel(new ColorWheel()),
         rectangle(new Color2DSlider()),
         hue_slider(new HueSlider(Qt::Vertical)),
+        rgb_chooser(new ComponentColorSelector()),
         color_history(new Swatch()),
         harmony_buttons(new QButtonGroup()),
         wheel_layout(new QVBoxLayout()),
@@ -94,6 +96,7 @@ public:
         addColorWidget(wheel);
         addColorWidget(rectangle);
         addColorWidget(hue_slider);
+        addColorWidget(rgb_chooser);
 
         auto harmony_none = newToolButton(
             "media-playback-start",
@@ -172,6 +175,8 @@ public:
         auto rectangle_widget = new QWidget();
         rectangle_widget->setLayout(rectangle_layout);
         tabs_widget->addTab(rectangle_widget, tr("Rectangle"));
+
+        main_layout->addWidget(rgb_chooser);
 
         main_layout->addWidget(color_history);
         main_layout->setStretchFactor(tabs_widget, 1);
@@ -280,6 +285,7 @@ public:
     ColorWheel* wheel;
     Color2DSlider* rectangle;
     HueSlider* hue_slider;
+    ComponentColorSelector* rgb_chooser;
     Swatch* color_history;
     QButtonGroup* harmony_buttons;
     QVBoxLayout* wheel_layout;
