@@ -70,6 +70,7 @@ src/color_utils.hpp
 src/hue_slider.cpp
 src/color_wheel.cpp
 src/color_names.cpp
+src/component_color_selector.cpp
 src/advanced_color_selector.cpp
 )
 
@@ -92,6 +93,7 @@ include/color_list_widget.hpp
 include/color_preview.hpp
 include/gradient_slider.hpp
 include/color_names.hpp
+include/component_color_selector.hpp
 include/advanced_color_selector.hpp
 )
 
