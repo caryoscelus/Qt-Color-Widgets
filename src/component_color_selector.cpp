@@ -44,6 +44,8 @@ public:
         layout->addWidget(red_slider);
         layout->addWidget(green_slider);
         layout->addWidget(blue_slider);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(0);
 
         red_slider->setFirstColor("#000000");
         red_slider->setLastColor("#ff0000");
