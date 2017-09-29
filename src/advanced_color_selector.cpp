@@ -52,6 +52,7 @@ public:
         auto layout = new QHBoxLayout();
         layout->addWidget(widget);
         layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(0);
         setLayout(layout);
         widget->installEventFilter(this);
     }
@@ -135,6 +136,8 @@ public:
         main_layout->addWidget(tabs_widget);
 
         auto wheel_widget = new QWidget();
+        wheel_layout->setContentsMargins(0, 0, 0, 0);
+        wheel_layout->setSpacing(0);
         wheel_widget->setLayout(wheel_layout);
 //         wheel_widget->installEventFilter(p.data());
 
