@@ -26,6 +26,8 @@
 #include <QTabWidget>
 #include <QEvent>
 #include <QButtonGroup>
+#include <QAction>
+#include <QMenu>
 #include <QDebug>
 
 #include <memory>
@@ -187,6 +189,20 @@ public:
         color_history->setColorSizePolicy(Swatch::Minimum);
         color_history->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
+        auto config_menu_button = new QToolButton();
+        config_menu_button->setDefaultAction(new QAction(QIcon::fromTheme("configure"), "Configure"));
+        config_menu_button->setPopupMode(QToolButton::InstantPopup);
+        auto config_menu = new QMenu();
+        auto enable_rgb_action = new QAction("RGB sliders");
+        enable_rgb_action->setCheckable(true);
+        connect(enable_rgb_action, &QAction::toggled, [this](bool show) {
+            rgb_chooser->setVisible(show);
+        });
+        config_menu->addAction(enable_rgb_action);
+        config_menu_button->setMenu(config_menu);
+        tabs_widget->setCornerWidget(config_menu_button);
+        enable_rgb_action->setChecked(true);
+
         parent->setLayout(main_layout);
 
         connect(color_history, &Swatch::colorSelected, this, &Private::setColor);
@@ -292,6 +308,7 @@ public:
     Swatch* color_history;
     QButtonGroup* harmony_buttons;
     QVBoxLayout* wheel_layout;
+    EnabledWidgetsFlags enabled_widgets;
 private:
     AdvancedColorSelector * const parent;
     QVector<QObject*> widgets;
@@ -342,6 +359,15 @@ void AdvancedColorSelector::saveToHistory() {
         return;
     h->palette().insertColor(0, color());
     h->setSelected(0);
+}
+
+void AdvancedColorSelector::setEnabledWidgets(EnabledWidgetsFlags flags) {
+    p->enabled_widgets = flags;
+    if (RGBSliders & p->enabled_widgets) {
+        p->rgb_chooser->show();
+    } else {
+        p->rgb_chooser->hide();
+    }
 }
 
 } // namespace color_widgets

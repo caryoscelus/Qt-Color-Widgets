@@ -36,11 +36,22 @@ class QCP_EXPORT AdvancedColorSelector : public QWidget
     // TODO: define Q_PROPERTYs
 
 public:
+    enum EnabledWidgets {
+        Main        = 0x0001,
+        History     = 0x0002,
+        RGBSliders  = 0x0004,
+    };
+    Q_DECLARE_FLAGS(EnabledWidgetsFlags, EnabledWidgets)
+    Q_FLAGS(EnabledWidgetsFlags)
+
+public:
     explicit AdvancedColorSelector(QWidget* parent = nullptr);
     ~AdvancedColorSelector();
 
 public:
     QColor color() const;
+
+    void setEnabledWidgets(EnabledWidgetsFlags flags);
 
 public Q_SLOTS:
     void setColor(QColor c);
