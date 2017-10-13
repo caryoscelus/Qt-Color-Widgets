@@ -25,6 +25,7 @@
 #include <QToolButton>
 #include <QTabWidget>
 #include <QEvent>
+#include <QResizeEvent>
 #include <QButtonGroup>
 #include <QAction>
 #include <QMenu>
@@ -137,16 +138,17 @@ public:
         auto tabs_widget = new QTabWidget();
         main_layout->addWidget(tabs_widget);
 
-        auto wheel_widget = new QWidget();
+        auto wheel_container_widget = new QWidget();
+        wheel_container_widget->installEventFilter(this);
+        wheel_widget = new QWidget(wheel_container_widget);
         wheel_layout->setContentsMargins(0, 0, 0, 0);
         wheel_layout->setSpacing(0);
         wheel_widget->setLayout(wheel_layout);
-//         wheel_widget->installEventFilter(p.data());
 
-        auto form_button = new QToolButton(/*wheel_widget*/);
+        form_button = new QToolButton(wheel_container_widget);
         form_button->setCheckable(true);
         form_button->resize(32, 32);
-        connect(form_button, &QToolButton::toggled, [this, form_button](bool square) {
+        connect(form_button, &QToolButton::toggled, [this](bool square) {
             if (square)
             {
                 form_button->setIcon(QIcon::fromTheme("draw-triangle3"));
@@ -160,19 +162,12 @@ public:
         });
         form_button->setChecked(true);
 
-        auto harmony_layout = new QHBoxLayout();
-        harmony_layout->addWidget(form_button);
-
         for (auto button : harmony_buttons->buttons())
-            harmony_layout->addWidget(button);
+            button->setParent(wheel_container_widget);
 
-        auto harmony_widget = new QWidget();
-        harmony_widget->setLayout(harmony_layout);
-
-        wheel_layout->addWidget(harmony_widget);
         wheel_layout->addWidget(wheel, 1.0);
 
-        tabs_widget->addTab(wheel_widget, tr("Wheel"));
+        tabs_widget->addTab(wheel_container_widget, tr("Wheel"));
 
         auto rectangle_layout = new QHBoxLayout();
         rectangle_layout->addWidget(rectangle);
@@ -217,6 +212,22 @@ public:
     }
     ~Private() = default;
 public:
+    bool eventFilter(QObject* /*target*/, QEvent* event) override {
+        if (event->type() == QEvent::Resize) {
+            auto size = static_cast<QResizeEvent*>(event)->size();
+            auto w = size.width();
+            auto h = size.height();
+            wheel_widget->setGeometry(0, 0, w, h);
+            form_button->move(w*.05, h*.1);
+            int i = 0;
+            for (auto button : harmony_buttons->buttons()) {
+                button->move(w*(.5+i*.1), h*(.02+i*.04));
+                ++i;
+            }
+        }
+        return false;
+    }
+
     /**
      * Adds color widget with proper signals & slots
      *
@@ -311,6 +322,8 @@ public:
     EnabledWidgetsFlags enabled_widgets;
 private:
     AdvancedColorSelector * const parent;
+    QWidget* wheel_widget;
+    QToolButton* form_button;
     QVector<QObject*> widgets;
     std::unique_ptr<QWidget> harmony_colors_widget = nullptr;
     QHBoxLayout* harmony_colors_layout = nullptr;
