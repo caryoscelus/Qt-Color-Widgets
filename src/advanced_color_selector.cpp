@@ -44,6 +44,8 @@
 
 namespace color_widgets {
 
+static const int HISTORY_COLUMNS = 12;
+
 class HarmonyButton : public QWidget {
 public:
     HarmonyButton(AdvancedColorSelector* parent, unsigned n) :
@@ -180,7 +182,7 @@ public:
 
         main_layout->addWidget(color_history);
         main_layout->setStretchFactor(tabs_widget, 1);
-        color_history->setForcedColumns(12);
+        color_history->setForcedColumns(HISTORY_COLUMNS);
         color_history->setColorSizePolicy(Swatch::Minimum);
         color_history->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
@@ -370,6 +372,9 @@ void AdvancedColorSelector::saveToHistory() {
     auto h = p->color_history;
     if (h->palette().colorAt(0) == color())
         return;
+    while (h->palette().count() > HISTORY_COLUMNS-1) {
+        h->palette().eraseColor(HISTORY_COLUMNS-1);
+    }
     h->palette().insertColor(0, color());
     h->setSelected(0);
 }
