@@ -142,7 +142,7 @@ public:
             for ( int x = 0; x < width; ++x )
             {
                 inner_selector.setPixel( x, y,
-                        color_from(hue,double(x)/width,double(y)/width,1).rgb());
+                        color_from(hue,double(width-x)/width,double(y)/width,1).rgb());
             }
         }
     }
@@ -394,7 +394,7 @@ void ColorWheel::paintEvent(QPaintEvent * )
     if ( p->display_flags & SHAPE_SQUARE )
     {
         qreal side = p->square_size();
-        selector_position = QPointF(p->sat*side, p->val*side);
+        selector_position = QPointF((1.0-p->sat)*side, p->val*side);
     }
     else if ( p->display_flags & SHAPE_TRIANGLE )
     {
@@ -475,7 +475,7 @@ void ColorWheel::mouseMoveEvent(QMouseEvent *ev)
 
         if ( p->display_flags & SHAPE_SQUARE )
         {
-            p->sat = qBound(0.0, center_mouse_ln.x2()/p->square_size(), 1.0);
+            p->sat = 1.0-qBound(0.0, center_mouse_ln.x2()/p->square_size(), 1.0);
             p->val = qBound(0.0, center_mouse_ln.y2()/p->square_size(), 1.0);
         }
         else if ( p->display_flags & SHAPE_TRIANGLE )
