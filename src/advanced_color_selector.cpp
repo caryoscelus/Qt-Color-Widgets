@@ -162,15 +162,16 @@ public:
         form_button = new QToolButton(wheel_container_widget);
         form_button->setCheckable(true);
         form_button->resize(32, 32);
+        form_button->setStyleSheet("border: 0px;");
         connect(form_button, &QToolButton::toggled, [this](bool square) {
             if (square)
             {
-                form_button->setIcon(QIcon::fromTheme("draw-triangle3"));
+                form_button->setIcon(QIcon(":/color_widgets/harmony/triangle.png"));
                 wheel->setDisplayFlags(ColorWheel::SHAPE_SQUARE | ColorWheel::ANGLE_FIXED);
             }
             else
             {
-                form_button->setIcon(QIcon::fromTheme("draw-rectangle"));
+                form_button->setIcon(QIcon(":/color_widgets/harmony/rectangle.png"));
                 wheel->setDisplayFlags(ColorWheel::SHAPE_TRIANGLE | ColorWheel::ANGLE_ROTATING);
             }
         });
@@ -263,6 +264,11 @@ public:
         button->setCheckable(true);
         button->resize(32, 32);
         button->setIcon(icon);
+        button->setStyleSheet(
+            "QToolButton { border: 0px; }\n"
+            "QToolButton:hover { border: 1px solid palette(dark); }\n"
+            "QToolButton:checked { border: 2px solid palette(dark); }"
+        );
         connect(button, &QToolButton::toggled, callback);
         return button;
     }
