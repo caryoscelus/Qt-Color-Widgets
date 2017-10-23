@@ -135,6 +135,18 @@ public:
                 }
             )
         );
+        harmony_buttons->addButton(
+            newToolButton(
+                "media-playback-start",
+                [this]() {
+                    wheel->clearHarmonies();
+                    wheel->addHarmony(0.5, false);
+                    auto a = wheel->addHarmony(0.125, true);
+                    wheel->addOppositeHarmony(a);
+                    updateColors();
+                }
+            )
+        );
         auto main_layout = new QVBoxLayout();
 
         auto tabs_widget = new QTabWidget();
