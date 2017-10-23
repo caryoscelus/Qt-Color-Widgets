@@ -155,7 +155,7 @@ public:
         auto wheel_container_widget = new QWidget();
         wheel_container_widget->installEventFilter(this);
         wheel_widget = new QWidget(wheel_container_widget);
-        wheel_layout->setContentsMargins(0, 40, 20, 0);
+        wheel_layout->setContentsMargins(0, 0, 0, 0);
         wheel_layout->setSpacing(0);
         wheel_widget->setLayout(wheel_layout);
 
@@ -180,7 +180,12 @@ public:
         for (auto button : harmony_buttons->buttons())
             button->setParent(wheel_container_widget);
 
-        wheel_layout->addWidget(wheel, 1.0);
+        auto wheel_inner_container = new QWidget();
+        auto wheel_inner_layout = new QVBoxLayout();
+        wheel_inner_layout->setContentsMargins(0, 40, 20, 0);
+        wheel_inner_layout->addWidget(wheel);
+        wheel_inner_container->setLayout(wheel_inner_layout);
+        wheel_layout->addWidget(wheel_inner_container, 1.0);
 
         tabs_widget->addTab(wheel_container_widget, tr("Wheel"));
 
