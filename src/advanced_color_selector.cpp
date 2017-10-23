@@ -105,7 +105,7 @@ public:
         addColorWidget(rgb_chooser);
 
         auto harmony_none = newToolButton(
-            "media-playback-start",
+            QIcon(":/color_widgets/harmony/none.png"),
             [this]() {
                 wheel->clearHarmonies();
                 updateColors();
@@ -116,7 +116,7 @@ public:
         );
         harmony_buttons->addButton(
             newToolButton(
-                "media-playback-start",
+                QIcon(":/color_widgets/harmony/complementary.png"),
                 [this]() {
                     wheel->clearHarmonies();
                     wheel->addHarmony(0.5, false);
@@ -126,7 +126,7 @@ public:
         );
         harmony_buttons->addButton(
             newToolButton(
-                "media-playback-start",
+                QIcon(":/color_widgets/harmony/analogus.png"),
                 [this]() {
                     wheel->clearHarmonies();
                     auto a = wheel->addHarmony(0.125, true);
@@ -137,7 +137,7 @@ public:
         );
         harmony_buttons->addButton(
             newToolButton(
-                "media-playback-start",
+                QIcon(":/color_widgets/harmony/tetradic.png"),
                 [this]() {
                     wheel->clearHarmonies();
                     wheel->addHarmony(0.5, false);
@@ -258,11 +258,11 @@ public:
         disconnect(widget, SIGNAL(colorChanged(QColor)), parent, SLOT(setBaseColor(QColor)));
     }
     template <typename F>
-    QToolButton* newToolButton(QString icon, F callback) const {
+    QToolButton* newToolButton(QIcon const& icon, F callback) const {
         auto button = new QToolButton();
         button->setCheckable(true);
         button->resize(32, 32);
-        button->setIcon(QIcon::fromTheme(icon));
+        button->setIcon(icon);
         connect(button, &QToolButton::toggled, callback);
         return button;
     }
