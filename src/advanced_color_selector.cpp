@@ -155,7 +155,7 @@ public:
         auto wheel_container_widget = new QWidget();
         wheel_container_widget->installEventFilter(this);
         wheel_widget = new QWidget(wheel_container_widget);
-        wheel_layout->setContentsMargins(0, 0, 0, 0);
+        wheel_layout->setContentsMargins(0, 40, 20, 0);
         wheel_layout->setSpacing(0);
         wheel_widget->setLayout(wheel_layout);
 
@@ -232,10 +232,12 @@ public:
             auto w = size.width();
             auto h = size.height();
             wheel_widget->setGeometry(0, 0, w, h);
-            form_button->move(w*.05, h*.1);
+            form_button->move(5, h-80);
             int i = 0;
+            auto x_start = std::min(w*.7, w-40.0*4);
+            x_start = std::max(0.0, x_start);
             for (auto button : harmony_buttons->buttons()) {
-                button->move(w*(.5+i*.1), h*(.02+i*.04));
+                button->move(x_start+i*48-i*i*4, i*i*8-i*2);
                 ++i;
             }
         }
