@@ -238,12 +238,13 @@ public:
             auto w = size.width();
             auto h = size.height();
             wheel_widget->setGeometry(0, 0, w, h);
-            form_button->move(5, h-80);
+            form_button->move(5, h-60);
             int i = 0;
-            auto x_start = std::min(w*.7, w-40.0*4);
-            x_start = std::max(0.0, x_start);
+            auto x_start = std::max(0.0, 0.95*w-40.0*3.5-std::max(w-h, 0)/2.0);
+            auto y_start = std::max(h-w-60, 0)/2.0;
             for (auto button : harmony_buttons->buttons()) {
-                button->move(x_start+i*48-i*i*4, i*i*8-i*2);
+                auto j = i*std::sqrt(std::min(w, h)/256.0);
+                button->move(x_start+j*48-j*j*4, y_start+j*j*8-j*2);
                 ++i;
             }
         }
