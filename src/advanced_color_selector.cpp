@@ -48,40 +48,22 @@ static const int HISTORY_COLUMNS = 12;
 
 class HarmonyButton : public QWidget {
 public:
-    HarmonyButton(AdvancedColorSelector* parent, unsigned n) :
-        parent(parent),
-        n(n),
-        widget(new ColorLineEdit(this))
-    {
-        widget->setPreviewColor(true);
-        auto layout = new QHBoxLayout();
-        layout->addWidget(widget);
-        layout->setContentsMargins(0, 0, 0, 0);
-        layout->setSpacing(0);
-        setLayout(layout);
-        widget->installEventFilter(this);
-    }
-    inline void setColor(const QColor& color) {
+    HarmonyButton(AdvancedColorSelector::Private* parent, unsigned n);
+    void setColor(const QColor& color) {
         widget->setColor(color);
     }
-    inline void setReadOnly(bool ro) {
+    void setReadOnly(bool ro) {
         widget->setReadOnly(ro);
     }
     void setSelected(bool active) {
         setStyleSheet(active ? "font-weight: bold" : "");
     }
-    bool eventFilter(QObject* object, QEvent* event) override {
-        if (dynamic_cast<ColorLineEdit*>(object))
-        {
-            if (event->type() == QEvent::MouseButtonPress)
-            {
-                parent->setHarmony(n);
-            }
-        }
-        return false;
+    bool isModified() const {
+        return widget->isModified();
     }
+    bool eventFilter(QObject* object, QEvent* event) override;
 private:
-    AdvancedColorSelector* parent;
+    AdvancedColorSelector::Private* parent;
     unsigned n;
     ColorLineEdit* widget;
 };
@@ -303,7 +285,7 @@ public:
             harmony_colors_widgets.clear();
             for (unsigned i = 0; i < count; ++i)
             {
-                auto button = new HarmonyButton(parent, i);
+                auto button = new HarmonyButton(this, i);
                 harmony_colors_layout->addWidget(button);
                 harmony_colors_widgets.append(button);
             }
@@ -311,8 +293,9 @@ public:
         unsigned i = 0;
         for (auto widget : harmony_colors_widgets)
         {
-            widget->setColor(colors[i]);
-            widget->setReadOnly(true);
+            if (!widget->isModified())
+                widget->setColor(colors[i]);
+            widget->setReadOnly(i != 0);
             widget->setSelected((int)i == selected_harmony);
             ++i;
         }
@@ -358,6 +341,37 @@ private:
     QVector<HarmonyButton*> harmony_colors_widgets;
     int selected_harmony = 0;
 };
+
+HarmonyButton::HarmonyButton(AdvancedColorSelector::Private* parent, unsigned n) :
+    parent(parent),
+    n(n),
+    widget(new ColorLineEdit(this))
+{
+    widget->setPreviewColor(true);
+    auto layout = new QHBoxLayout();
+    layout->addWidget(widget);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    setLayout(layout);
+    widget->installEventFilter(this);
+    if (n == 0) {
+        connect(widget, &ColorLineEdit::colorChanged, parent, &AdvancedColorSelector::Private::setBaseColor);
+        connect(widget, &ColorLineEdit::editingFinished, [this]() {
+            widget->setModified(false);
+        });
+    }
+}
+
+bool HarmonyButton::eventFilter(QObject* object, QEvent* event) {
+    if (dynamic_cast<ColorLineEdit*>(object))
+    {
+        if (event->type() == QEvent::MouseButtonPress)
+        {
+            parent->setHarmony(n);
+        }
+    }
+    return false;
+}
 
 AdvancedColorSelector::AdvancedColorSelector(QWidget* parent) :
     QWidget(parent),

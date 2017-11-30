@@ -29,11 +29,15 @@
 
 namespace color_widgets {
 
+class HarmonyButton;
+
 class QCP_EXPORT AdvancedColorSelector : public QWidget
 {
     Q_OBJECT
 
     // TODO: define Q_PROPERTYs
+
+    friend class HarmonyButton;
 
 public:
     enum EnabledWidgets {
