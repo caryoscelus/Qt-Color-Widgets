@@ -23,6 +23,7 @@
 #include "component_color_selector.hpp"
 
 #include "gradient_slider.hpp"
+#include "hue_slider.hpp"
 
 #include <QBoxLayout>
 
@@ -32,7 +33,17 @@ class ComponentContainer {
 public:
     ComponentContainer(ComponentColorSelector* widget)
         : w(widget)
+        , layout(new QVBoxLayout())
     {
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(0);
+    }
+
+    void addWidget(QSlider* slider) {
+        layout->addWidget(slider);
+        QObject::connect(slider, &QSlider::valueChanged, [this]() {
+            Q_EMIT w->colorChanged(color());
+        });
     }
 
     virtual void init() = 0;
@@ -40,8 +51,9 @@ public:
     virtual QColor color() const = 0;
     virtual void setColor(QColor c) = 0;
 
-public:
-    ComponentColorSelector * const w;
+protected:
+    ComponentColorSelector* const w;
+    QVBoxLayout* layout;
 };
 
 ComponentColorSelector::ComponentColorSelector(std::unique_ptr<ComponentContainer> container, QWidget* parent) :
@@ -71,14 +83,7 @@ public:
         , red_slider(new GradientSlider())
         , green_slider(new GradientSlider())
         , blue_slider(new GradientSlider())
-        , layout(new QVBoxLayout())
     {
-        layout->addWidget(red_slider);
-        layout->addWidget(green_slider);
-        layout->addWidget(blue_slider);
-        layout->setContentsMargins(0, 0, 0, 0);
-        layout->setSpacing(0);
-
         red_slider->setFirstColor("#000000");
         red_slider->setLastColor("#ff0000");
         red_slider->setMaximum(255);
@@ -89,12 +94,9 @@ public:
         blue_slider->setLastColor("#0000ff");
         blue_slider->setMaximum(255);
 
-        auto send_signal = [this]() {
-            Q_EMIT w->colorChanged(color());
-        };
-        QObject::connect(red_slider, &QSlider::valueChanged, send_signal);
-        QObject::connect(green_slider, &QSlider::valueChanged, send_signal);
-        QObject::connect(blue_slider, &QSlider::valueChanged, send_signal);
+        addWidget(red_slider);
+        addWidget(green_slider);
+        addWidget(blue_slider);
     }
 
     void init() override {
@@ -117,7 +119,53 @@ private:
     GradientSlider* red_slider;
     GradientSlider* green_slider;
     GradientSlider* blue_slider;
-    QVBoxLayout* layout;
+};
+
+class HsvContainer : public ComponentContainer
+{
+public:
+    HsvContainer(ComponentColorSelector *widget)
+        : ComponentContainer(widget)
+        , hue_slider(new HueSlider())
+        , saturation_slider(new GradientSlider())
+        , value_slider(new GradientSlider())
+    {
+        hue_slider->setMaximum(360);
+        saturation_slider->setFirstColor("#888888");
+        saturation_slider->setLastColor("#ff0000");
+        saturation_slider->setMaximum(255);
+        value_slider->setFirstColor("#000000");
+        value_slider->setLastColor("#ffffff");
+        value_slider->setMaximum(255);
+
+        addWidget(hue_slider);
+        addWidget(saturation_slider);
+        addWidget(value_slider);
+    }
+
+    void init() override {
+        w->setLayout(layout);
+    }
+
+    QColor color() const override {
+        return QColor::fromHsv(
+            hue_slider->value(),
+            saturation_slider->value(),
+            value_slider->value()
+        );
+    }
+
+    void setColor(QColor c) override {
+        hue_slider->setValue(c.hue());
+        value_slider->setValue(c.value());
+        saturation_slider->setLastColor(QColor::fromHsv(c.hue(), 255, 255));
+        saturation_slider->setValue(c.saturation());
+    }
+
+private:
+    GradientSlider* hue_slider;
+    GradientSlider* saturation_slider;
+    GradientSlider* value_slider;
 };
 
 // TODO: use std::make_unique
@@ -132,6 +180,14 @@ RgbColorSelector::RgbColorSelector(QWidget* parent) :
 }
 
 RgbColorSelector::~RgbColorSelector() {
+}
+
+HsvColorSelector::HsvColorSelector(QWidget* parent) :
+    ComponentColorSelector(make_unique<HsvContainer>(this), parent)
+{
+}
+
+HsvColorSelector::~HsvColorSelector() {
 }
 
 } // namespace color_widgets

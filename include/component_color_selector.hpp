@@ -66,6 +66,12 @@ public:
     virtual ~RgbColorSelector();
 };
 
+class QCP_EXPORT HsvColorSelector : public ComponentColorSelector {
+public:
+    explicit HsvColorSelector(QWidget* parent = nullptr);
+    virtual ~HsvColorSelector();
+};
+
 } // namespace color_widgets
 
 #endif
