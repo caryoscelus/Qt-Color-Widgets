@@ -76,6 +76,7 @@ public:
         rectangle(new Color2DSlider()),
         hue_slider(new HueSlider(Qt::Vertical)),
         rgb_chooser(new RgbColorSelector()),
+        hsv_chooser(new HsvColorSelector()),
         color_history(new Swatch()),
         harmony_buttons(new QButtonGroup()),
         wheel_layout(new QVBoxLayout()),
@@ -85,6 +86,7 @@ public:
         addColorWidget(rectangle);
         addColorWidget(hue_slider);
         addColorWidget(rgb_chooser);
+        addColorWidget(hsv_chooser);
 
         auto harmony_none = newToolButton(
             QIcon(":/color_widgets/harmony/none.png"),
@@ -179,6 +181,7 @@ public:
         tabs_widget->addTab(rectangle_widget, tr("Rectangle"));
 
         main_layout->addWidget(rgb_chooser);
+        main_layout->addWidget(hsv_chooser);
 
         main_layout->addWidget(color_history);
         main_layout->setStretchFactor(tabs_widget, 1);
@@ -189,6 +192,7 @@ public:
         auto config_menu_button = new QToolButton();
         config_menu_button->setDefaultAction(new QAction(QIcon::fromTheme("configure"), "Configure"));
         config_menu_button->setPopupMode(QToolButton::InstantPopup);
+
         auto config_menu = new QMenu();
         auto enable_rgb_action = new QAction("RGB sliders");
         enable_rgb_action->setCheckable(true);
@@ -196,6 +200,13 @@ public:
             rgb_chooser->setVisible(show);
         });
         config_menu->addAction(enable_rgb_action);
+        auto enable_hsv_action = new QAction("HSV sliders");
+        enable_hsv_action->setCheckable(true);
+        connect(enable_hsv_action, &QAction::toggled, [this](bool show) {
+            hsv_chooser->setVisible(show);
+        });
+        config_menu->addAction(enable_hsv_action);
+
         config_menu_button->setMenu(config_menu);
         tabs_widget->setCornerWidget(config_menu_button);
         enable_rgb_action->setChecked(true);
@@ -327,6 +338,7 @@ public:
     Color2DSlider* rectangle;
     HueSlider* hue_slider;
     RgbColorSelector* rgb_chooser;
+    HsvColorSelector* hsv_chooser;
     Swatch* color_history;
     QButtonGroup* harmony_buttons;
     QVBoxLayout* wheel_layout;
@@ -421,10 +433,15 @@ void AdvancedColorSelector::saveToHistory() {
 
 void AdvancedColorSelector::setEnabledWidgets(EnabledWidgetsFlags flags) {
     p->enabled_widgets = flags;
-    if (RGBSliders & p->enabled_widgets) {
+    if (flags & RGBSliders) {
         p->rgb_chooser->show();
     } else {
         p->rgb_chooser->hide();
+    }
+    if (flags & HSVSliders) {
+        p->hsv_chooser->show();
+    } else {
+        p->hsv_chooser->hide();
     }
 }
 

@@ -44,6 +44,7 @@ public:
         Main        = 0x0001,
         History     = 0x0002,
         RGBSliders  = 0x0004,
+        HSVSliders  = 0x0008,
     };
     Q_DECLARE_FLAGS(EnabledWidgetsFlags, EnabledWidgets)
     Q_FLAGS(EnabledWidgetsFlags)
