@@ -35,14 +35,16 @@
 
 namespace color_widgets {
 
+class ComponentContainer;
+
 /**
  * Color selector consisting of few slider/input components
  */
-class QCP_EXPORT ComponentColorSelector : public QWidget {
+class ComponentColorSelector : public QWidget {
     Q_OBJECT
 
 public:
-    explicit ComponentColorSelector(QWidget *parent = nullptr);
+    explicit ComponentColorSelector(std::unique_ptr<ComponentContainer> container, QWidget* parent = nullptr);
     virtual ~ComponentColorSelector();
 
 public:
@@ -55,8 +57,13 @@ Q_SIGNALS:
     void colorChanged(QColor c);
 
 private:
-    class Private;
-    std::unique_ptr<Private> const p;
+    std::unique_ptr<ComponentContainer> const p;
+};
+
+class QCP_EXPORT RgbColorSelector : public ComponentColorSelector {
+public:
+    explicit RgbColorSelector(QWidget* parent = nullptr);
+    virtual ~RgbColorSelector();
 };
 
 } // namespace color_widgets

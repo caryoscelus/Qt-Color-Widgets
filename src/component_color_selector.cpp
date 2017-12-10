@@ -28,19 +28,51 @@
 
 namespace color_widgets {
 
-class ComponentColorSelector::Private
-{
-private:
-    ComponentColorSelector * const w;
+class ComponentContainer {
+public:
+    ComponentContainer(ComponentColorSelector* widget)
+        : w(widget)
+    {
+    }
+
+    virtual void init() = 0;
+
+    virtual QColor color() const = 0;
+    virtual void setColor(QColor c) = 0;
 
 public:
-    Private(ComponentColorSelector *widget)
-        : w(widget)
+    ComponentColorSelector * const w;
+};
+
+ComponentColorSelector::ComponentColorSelector(std::unique_ptr<ComponentContainer> container, QWidget* parent) :
+    QWidget(parent),
+    p(std::move(container))
+{
+    p->init();
+}
+
+ComponentColorSelector::~ComponentColorSelector()
+{
+}
+
+QColor ComponentColorSelector::color() const {
+    return p->color();
+}
+
+void ComponentColorSelector::setColor(QColor c) {
+    p->setColor(c);
+}
+
+class RgbContainer : public ComponentContainer
+{
+public:
+    RgbContainer(ComponentColorSelector *widget)
+        : ComponentContainer(widget)
         , red_slider(new GradientSlider())
         , green_slider(new GradientSlider())
         , blue_slider(new GradientSlider())
+        , layout(new QVBoxLayout())
     {
-        auto layout = new QVBoxLayout();
         layout->addWidget(red_slider);
         layout->addWidget(green_slider);
         layout->addWidget(blue_slider);
@@ -60,47 +92,46 @@ public:
         auto send_signal = [this]() {
             Q_EMIT w->colorChanged(color());
         };
-        connect(red_slider, &QSlider::valueChanged, send_signal);
-        connect(green_slider, &QSlider::valueChanged, send_signal);
-        connect(blue_slider, &QSlider::valueChanged, send_signal);
+        QObject::connect(red_slider, &QSlider::valueChanged, send_signal);
+        QObject::connect(green_slider, &QSlider::valueChanged, send_signal);
+        QObject::connect(blue_slider, &QSlider::valueChanged, send_signal);
+    }
 
+    void init() override {
         w->setLayout(layout);
     }
 
-    QColor color() const {
+    QColor color() const override {
         return QColor(red_slider->value(),
                       green_slider->value(),
                       blue_slider->value());
     }
 
-    void setColor(QColor c) {
+    void setColor(QColor c) override {
         red_slider->setValue(c.red());
         green_slider->setValue(c.green());
         blue_slider->setValue(c.blue());
     }
 
 private:
-    GradientSlider *red_slider;
-    GradientSlider *green_slider;
-    GradientSlider *blue_slider;
+    GradientSlider* red_slider;
+    GradientSlider* green_slider;
+    GradientSlider* blue_slider;
+    QVBoxLayout* layout;
 };
 
-ComponentColorSelector::ComponentColorSelector(QWidget* parent) :
-    QWidget(parent),
-    p(new Private(this))
+// TODO: use std::make_unique
+template <typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args) {
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+RgbColorSelector::RgbColorSelector(QWidget* parent) :
+    ComponentColorSelector(make_unique<RgbContainer>(this), parent)
 {
 }
 
-ComponentColorSelector::~ComponentColorSelector()
-{
-}
-
-QColor ComponentColorSelector::color() const {
-    return p->color();
-}
-
-void ComponentColorSelector::setColor(QColor c) {
-    p->setColor(c);
+RgbColorSelector::~RgbColorSelector() {
 }
 
 } // namespace color_widgets

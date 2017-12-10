@@ -75,7 +75,7 @@ public:
         wheel(new ColorWheel()),
         rectangle(new Color2DSlider()),
         hue_slider(new HueSlider(Qt::Vertical)),
-        rgb_chooser(new ComponentColorSelector()),
+        rgb_chooser(new RgbColorSelector()),
         color_history(new Swatch()),
         harmony_buttons(new QButtonGroup()),
         wheel_layout(new QVBoxLayout()),
@@ -326,7 +326,7 @@ public:
     ColorWheel* wheel;
     Color2DSlider* rectangle;
     HueSlider* hue_slider;
-    ComponentColorSelector* rgb_chooser;
+    RgbColorSelector* rgb_chooser;
     Swatch* color_history;
     QButtonGroup* harmony_buttons;
     QVBoxLayout* wheel_layout;
