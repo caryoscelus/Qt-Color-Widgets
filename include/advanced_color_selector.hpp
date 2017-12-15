@@ -72,6 +72,8 @@ private:
     QScopedPointer<Private> const p;
 };
 
+Q_DECLARE_OPERATORS_FOR_FLAGS(AdvancedColorSelector::EnabledWidgetsFlags)
+
 } // namespace color_widgets
 
 #endif
