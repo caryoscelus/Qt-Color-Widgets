@@ -36,6 +36,7 @@
 
 #include "color_wheel.hpp"
 #include "color_2d_slider.hpp"
+#include "alpha_slider.hpp"
 #include "hue_slider.hpp"
 #include "color_line_edit.hpp"
 #include "swatch.hpp"
@@ -75,6 +76,7 @@ public:
         wheel(new ColorWheel()),
         rectangle(new Color2DSlider()),
         hue_slider(new HueSlider(Qt::Vertical)),
+        alpha_slider(new AlphaSlider()),
         rgb_chooser(new RgbColorSelector()),
         hsv_chooser(new HsvColorSelector()),
         color_history(new Swatch()),
@@ -85,6 +87,7 @@ public:
         addColorWidget(wheel);
         addColorWidget(rectangle);
         addColorWidget(hue_slider);
+        addColorWidget(alpha_slider);
         addColorWidget(rgb_chooser);
         addColorWidget(hsv_chooser);
 
@@ -180,6 +183,7 @@ public:
         rectangle_widget->setLayout(rectangle_layout);
         tabs_widget->addTab(rectangle_widget, tr("Rectangle"));
 
+        main_layout->addWidget(alpha_slider);
         main_layout->addWidget(rgb_chooser);
         main_layout->addWidget(hsv_chooser);
 
@@ -337,6 +341,7 @@ public:
     ColorWheel* wheel;
     Color2DSlider* rectangle;
     HueSlider* hue_slider;
+    AlphaSlider* alpha_slider;
     RgbColorSelector* rgb_chooser;
     HsvColorSelector* hsv_chooser;
     Swatch* color_history;
