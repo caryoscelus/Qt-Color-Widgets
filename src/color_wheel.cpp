@@ -4,7 +4,7 @@
  * \author Mattia Basaglia
  *
  * \copyright Copyright (C) 2013-2017 Mattia Basaglia
- * \copyright Copyright (C) 2017 caryoscelus
+ * \copyright Copyright (C) 2017-2018 caryoscelus
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -72,7 +72,7 @@ private:
     ColorWheel * const w;
 
 public:
-    qreal hue, sat, val;
+    qreal hue, sat, val, alpha;
     bool backgroundIsDark;
     unsigned int wheel_width;
     MouseStatus mouse_status;
@@ -253,6 +253,7 @@ public:
 
     void set_color(const QColor& c)
     {
+        alpha = c.alphaF();
         if ( display_flags & ColorWheel::COLOR_HSV )
         {
             hue = qMax(0.0, c.hsvHueF());
@@ -306,7 +307,7 @@ ColorWheel::~ColorWheel()
 
 QColor ColorWheel::color() const
 {
-    return p->color_from(p->hue, p->sat, p->val, 1);
+    return p->color_from(p->hue, p->sat, p->val, p->alpha);
 }
 
 QList<QColor> ColorWheel::harmonyColors() const
