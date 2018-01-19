@@ -106,19 +106,23 @@ public:
     QColor color() const override {
         return QColor(red_slider->value(),
                       green_slider->value(),
-                      blue_slider->value());
+                      blue_slider->value(),
+                      alpha
+        );
     }
 
     void setColor(QColor c) override {
         red_slider->setValue(c.red());
         green_slider->setValue(c.green());
         blue_slider->setValue(c.blue());
+        alpha = c.alpha();
     }
 
 private:
     GradientSlider* red_slider;
     GradientSlider* green_slider;
     GradientSlider* blue_slider;
+    int alpha = 255;
 };
 
 class HsvContainer : public ComponentContainer
@@ -151,7 +155,8 @@ public:
         return QColor::fromHsv(
             hue_slider->value(),
             saturation_slider->value(),
-            value_slider->value()
+            value_slider->value(),
+            alpha
         );
     }
 
@@ -160,12 +165,14 @@ public:
         value_slider->setValue(c.value());
         saturation_slider->setLastColor(QColor::fromHsv(c.hue(), 255, 255));
         saturation_slider->setValue(c.saturation());
+        alpha = c.alpha();
     }
 
 private:
     GradientSlider* hue_slider;
     GradientSlider* saturation_slider;
     GradientSlider* value_slider;
+    int alpha = 255;
 };
 
 // TODO: use std::make_unique
