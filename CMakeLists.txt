@@ -68,6 +68,7 @@ src/color_preview.cpp
 src/alphaback.png
 src/color_utils.hpp
 src/hue_slider.cpp
+src/alpha_slider.cpp
 src/color_wheel.cpp
 src/color_names.cpp
 src/component_color_selector.cpp
@@ -84,6 +85,7 @@ include/swatch.hpp
 include/color_delegate.hpp
 include/color_palette.hpp
 include/hue_slider.hpp
+include/alpha_slider.hpp
 include/abstract_widget_list.hpp
 include/bound_color_selector.hpp
 include/color_dialog.hpp
