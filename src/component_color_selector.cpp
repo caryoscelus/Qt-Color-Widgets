@@ -39,6 +39,8 @@ public:
         layout->setSpacing(0);
     }
 
+    virtual ~ComponentContainer() {}
+
     void addWidget(QSlider* slider) {
         layout->addWidget(slider);
         QObject::connect(slider, &QSlider::valueChanged, [this]() {
