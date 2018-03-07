@@ -85,7 +85,7 @@ public:
         parent(parent)
     {
         addColorWidget(wheel);
-        addColorWidget(rectangle);
+        addColorWidgetWOAlpha(rectangle);
         addColorWidget(hue_slider);
         addColorWidget(alpha_slider);
         addColorWidget(rgb_chooser);
@@ -257,9 +257,14 @@ public:
         widgets.push_back(widget);
         connect(widget, SIGNAL(colorChanged(QColor)), parent, SLOT(setBaseColor(QColor)));
     }
+    void addColorWidgetWOAlpha(QObject* widget) {
+        widgets.push_back(widget);
+        connect(widget, SIGNAL(colorChanged(QColor)), parent, SLOT(setBaseColorWOAlpha(QColor)));
+    }
     void removeColorWidget(QObject* widget) {
         widgets.removeAll(widget);
         disconnect(widget, SIGNAL(colorChanged(QColor)), parent, SLOT(setBaseColor(QColor)));
+        disconnect(widget, SIGNAL(colorChanged(QColor)), parent, SLOT(setBaseColorWOAlpha(QColor)));
     }
     template <typename F>
     QToolButton* newToolButton(QIcon const& icon, F callback) const {
@@ -281,12 +286,18 @@ public:
         setBaseColor(QColor::fromHsvF(baseHue, c.saturationF(), c.valueF()));
     }
     void setBaseColor(QColor c) {
+        base_color = c;
         for (auto widget : widgets) {
             auto oldState = widget->blockSignals(true);
-            QMetaObject::invokeMethod(widget, "setColor", Q_ARG(QColor, c));
+            if (!QMetaObject::invokeMethod(widget, "setFullColor", Q_ARG(QColor, c)))
+                QMetaObject::invokeMethod(widget, "setColor", Q_ARG(QColor, c));
             widget->blockSignals(oldState);
         }
         updateColors();
+    }
+    void setBaseColorWOAlpha(QColor c) {
+        c.setAlpha(base_color.alpha());
+        setBaseColor(c);
     }
     void updateColors() {
         auto count = wheel->harmonyCount();
@@ -356,6 +367,7 @@ private:
     std::unique_ptr<QWidget> harmony_colors_widget = nullptr;
     QHBoxLayout* harmony_colors_layout = nullptr;
     QVector<HarmonyButton*> harmony_colors_widgets;
+    QColor base_color;
     int selected_harmony = 0;
 };
 
@@ -417,6 +429,12 @@ void AdvancedColorSelector::setColor(QColor c)
 void AdvancedColorSelector::setBaseColor(QColor c)
 {
     p->setBaseColor(c);
+    Q_EMIT colorChanged(color());
+}
+
+void AdvancedColorSelector::setBaseColorWOAlpha(QColor c)
+{
+    p->setBaseColorWOAlpha(c);
     Q_EMIT colorChanged(color());
 }
 

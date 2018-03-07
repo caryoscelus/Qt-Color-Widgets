@@ -61,6 +61,7 @@ public:
 public Q_SLOTS:
     void setColor(QColor c);
     void setBaseColor(QColor c);
+    void setBaseColorWOAlpha(QColor c);
     void setHarmony(unsigned harmony);
     void saveToHistory();
 
