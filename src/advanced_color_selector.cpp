@@ -283,7 +283,7 @@ public:
     void setColor(QColor c) {
         auto baseHue = c.hueF() - color().hueF() + baseColor().hueF();
         baseHue -= std::floor(baseHue);
-        setBaseColor(QColor::fromHsvF(baseHue, c.saturationF(), c.valueF()));
+        setBaseColor(QColor::fromHsvF(baseHue, c.saturationF(), c.valueF(), c.alphaF()));
     }
     void setBaseColor(QColor c) {
         base_color = c;
