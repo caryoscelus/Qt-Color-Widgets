@@ -4,7 +4,7 @@
  *
  * \author caryoscelus
  *
- * \copyright Copyright (C) 2017 caryoscelus
+ * \copyright Copyright (C) 2017-2018 caryoscelus
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,6 +23,7 @@
 
 #include <QLayout>
 #include <QToolButton>
+#include <QPushButton>
 #include <QTabWidget>
 #include <QEvent>
 #include <QResizeEvent>
@@ -69,6 +70,50 @@ private:
     ColorLineEdit* widget;
 };
 
+QAction* addEnableDisableAction(QMenu* menu, QWidget* widget, QString name) {
+    auto action = new QAction(name);
+    action->setCheckable(true);
+    QObject::connect(action, &QAction::toggled, [widget](bool show) {
+        widget->setVisible(show);
+    });
+    menu->addAction(action);
+    return action;
+}
+
+
+class CustomPalette : public Swatch {
+public:
+    CustomPalette(AdvancedColorSelector* parent) :
+	Swatch(),
+	parent(parent)
+    {
+    }
+
+    void mousePressEvent(QMouseEvent *event) override {
+        if (event->button() == Qt::RightButton) {
+            int index = indexAt(event->pos());
+	    if (index < 0) {
+	        palette().appendColor(parent->color());
+		//palette().select
+	    } else {
+		palette().eraseColor(index);
+	    }
+	} else {
+	    Swatch::mousePressEvent(event);
+        }
+    }
+    /*
+    void mouseReleaseEvent(QMouseEvent *event) override {
+	if (false) {
+	} else {
+	    Swatch::mousePressEvent(event);
+	}
+    }*/
+
+private:
+    AdvancedColorSelector* parent;
+};
+
 class AdvancedColorSelector::Private : public QObject
 {
 public:
@@ -80,6 +125,7 @@ public:
         rgb_chooser(new RgbColorSelector()),
         hsv_chooser(new HsvColorSelector()),
         color_history(new Swatch()),
+	palette(new CustomPalette(parent)),
         harmony_buttons(new QButtonGroup()),
         wheel_layout(new QVBoxLayout()),
         parent(parent)
@@ -188,28 +234,25 @@ public:
         main_layout->addWidget(hsv_chooser);
 
         main_layout->addWidget(color_history);
+	main_layout->addWidget(palette);
+	palette->palette().appendColor(QColor());
+	
         main_layout->setStretchFactor(tabs_widget, 1);
-        color_history->setForcedColumns(HISTORY_COLUMNS);
-        color_history->setColorSizePolicy(Swatch::Minimum);
-        color_history->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+	for (auto& swatch : {color_history, palette}) {
+            swatch->setForcedColumns(HISTORY_COLUMNS);
+            swatch->setColorSizePolicy(Swatch::Minimum);
+            swatch->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+	}
 
         auto config_menu_button = new QToolButton();
         config_menu_button->setDefaultAction(new QAction(QIcon::fromTheme("configure"), "Configure"));
         config_menu_button->setPopupMode(QToolButton::InstantPopup);
 
         auto config_menu = new QMenu();
-        auto enable_rgb_action = new QAction("RGB sliders");
-        enable_rgb_action->setCheckable(true);
-        connect(enable_rgb_action, &QAction::toggled, [this](bool show) {
-            rgb_chooser->setVisible(show);
-        });
-        config_menu->addAction(enable_rgb_action);
-        auto enable_hsv_action = new QAction("HSV sliders");
-        enable_hsv_action->setCheckable(true);
-        connect(enable_hsv_action, &QAction::toggled, [this](bool show) {
-            hsv_chooser->setVisible(show);
-        });
-        config_menu->addAction(enable_hsv_action);
+
+	auto enable_rgb_action = addEnableDisableAction(config_menu, rgb_chooser, "RGB sliders");
+	addEnableDisableAction(config_menu, hsv_chooser, "HSV sliders");
+	addEnableDisableAction(config_menu, palette, "Palette");
 
         config_menu_button->setMenu(config_menu);
         tabs_widget->setCornerWidget(config_menu_button);
@@ -218,10 +261,17 @@ public:
         parent->setLayout(main_layout);
 
         connect(color_history, &Swatch::colorSelected, this, &Private::setColor);
+	connect(palette, &Swatch::colorSelected, this, &Private::setColor);
         connect(parent, &AdvancedColorSelector::colorChanged, [this]() {
             if (color() != color_history->selectedColor()) {
                 color_history->setSelected(-1);
             }
+	    /*if (int index = palette->selected()) {
+		palette->palette().setColorAt(index, color());
+	    }*/
+	    if (color() != palette->selectedColor()) {
+	        palette->setSelected(-1);
+	    }
         });
         connect(wheel, &ColorWheel::harmonyChanged, this, &Private::updateColors);
         harmony_none->setChecked(true);
@@ -356,6 +406,7 @@ public:
     RgbColorSelector* rgb_chooser;
     HsvColorSelector* hsv_chooser;
     Swatch* color_history;
+    Swatch* palette;
     QButtonGroup* harmony_buttons;
     QVBoxLayout* wheel_layout;
     EnabledWidgetsFlags enabled_widgets;
@@ -465,6 +516,11 @@ void AdvancedColorSelector::setEnabledWidgets(EnabledWidgetsFlags flags) {
         p->hsv_chooser->show();
     } else {
         p->hsv_chooser->hide();
+    }
+    if (flags & Palette) {
+        p->palette->show();
+    } else {
+        p->palette->hide();
     }
 }
 

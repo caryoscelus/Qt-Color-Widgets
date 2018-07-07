@@ -4,7 +4,7 @@
  *
  * \author caryoscelus
  *
- * \copyright Copyright (C) 2017 caryoscelus
+ * \copyright Copyright (C) 2017-2018 caryoscelus
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -45,6 +45,7 @@ public:
         History     = 0x0002,
         RGBSliders  = 0x0004,
         HSVSliders  = 0x0008,
+	Palette     = 0x0010,
     };
     Q_DECLARE_FLAGS(EnabledWidgetsFlags, EnabledWidgets)
     Q_FLAGS(EnabledWidgetsFlags)
