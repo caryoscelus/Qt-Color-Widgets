@@ -30,6 +30,7 @@
 #include <QButtonGroup>
 #include <QAction>
 #include <QMenu>
+#include <QPainter>
 #include <QDebug>
 
 #include <memory>
@@ -90,25 +91,28 @@ public:
     }
 
     void mousePressEvent(QMouseEvent *event) override {
-        if (event->button() == Qt::RightButton) {
-            int index = indexAt(event->pos());
-	    if (index < 0) {
-	        palette().appendColor(parent->color());
-		//palette().select
-	    } else {
-		palette().eraseColor(index);
-	    }
-	} else {
-	    Swatch::mousePressEvent(event);
+	int index = indexAt(event->pos());
+	if (index < 0) {
+	    palette().appendColor(parent->color());
+	} else if (event->button() == Qt::RightButton) {
+	    palette().eraseColor(index);
         }
+	Swatch::mousePressEvent(event);
     }
-    /*
-    void mouseReleaseEvent(QMouseEvent *event) override {
-	if (false) {
-	} else {
-	    Swatch::mousePressEvent(event);
-	}
-    }*/
+
+    void paintEvent(QPaintEvent* event) override {
+	Swatch::paintEvent(event);
+	int count = palette().count();
+	auto sz = actualColorSize();
+	int offset = sz.width()*count;
+	QPainter painter(this);
+	painter.setPen(QPen(Qt::white, 2));
+	auto xx = offset + sz.width()/2;
+	painter.drawLine(xx, 1, xx, sz.height()-2);
+	auto yy = sz.height()/2;
+	painter.drawLine(offset+1, yy, offset+sz.width()-2, yy);
+    }
+
 
 private:
     AdvancedColorSelector* parent;
