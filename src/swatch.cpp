@@ -675,6 +675,11 @@ QSize Swatch::colorSize() const
     return p->color_size;
 }
 
+QSizeF Swatch::actualColorSize() const
+{
+    return p->actualColorSize();
+}
+
 void Swatch::setColorSize(const QSize& colorSize)
 {
     if ( p->color_size != colorSize )

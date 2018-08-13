@@ -126,6 +126,7 @@ public:
     QSize colorSize() const;
     ColorSizePolicy colorSizePolicy() const;
     QPen border() const;
+    QSizeF actualColorSize() const;
 
     int forcedRows() const;
     int forcedColumns() const;
