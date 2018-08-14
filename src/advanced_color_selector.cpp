@@ -31,6 +31,8 @@
 #include <QAction>
 #include <QMenu>
 #include <QPainter>
+#include <QWidgetAction>
+#include <QSlider>
 #include <QDebug>
 
 #include <memory>
@@ -116,6 +118,19 @@ public:
 
 private:
     AdvancedColorSelector* parent;
+};
+
+class SwatchScaleAction : public QWidgetAction {
+public:
+    SwatchScaleAction(std::function<void(double)> action) :
+	QWidgetAction(nullptr)
+    {
+	auto slider = new QSlider(Qt::Horizontal);
+	slider->setMinimum(12);
+	slider->setMaximum(32);
+	connect(slider, &QSlider::valueChanged, action);
+	setDefaultWidget(slider);
+    }
 };
 
 class AdvancedColorSelector::Private : public QObject
@@ -253,6 +268,11 @@ public:
         config_menu_button->setPopupMode(QToolButton::InstantPopup);
 
         auto config_menu = new QMenu();
+	config_menu->addAction(new SwatchScaleAction([this](double value) {
+	    for (auto swatch : {color_history, palette}) {
+		swatch->setColorSize(QSize(value, value));
+	    }
+	}));
 
 	auto enable_rgb_action = addEnableDisableAction(config_menu, rgb_chooser, "RGB sliders");
 	addEnableDisableAction(config_menu, hsv_chooser, "HSV sliders");
