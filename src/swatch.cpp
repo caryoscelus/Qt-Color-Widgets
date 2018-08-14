@@ -682,8 +682,10 @@ QSizeF Swatch::actualColorSize() const
 
 void Swatch::setColorSize(const QSize& colorSize)
 {
-    if ( p->color_size != colorSize )
+    if ( p->color_size != colorSize ) {
         Q_EMIT colorSizeChanged(p->color_size = colorSize);
+	updateGeometry();
+    }
 }
 
 Swatch::ColorSizePolicy Swatch::colorSizePolicy() const
