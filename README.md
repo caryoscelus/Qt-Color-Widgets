@@ -28,7 +28,7 @@ Using it in a project
 
 For QMake-based projects, include color_widgets.pri in the QMake project file.
 For CMake-based projects, add this as subdirectory, it will be compiled as a
-library and you can link the required targets to ColorWidgets-qt5.
+library and you can link the required targets to ColorWidgets.
 All the required files are in ./src and ./include.
 
 
@@ -49,8 +49,8 @@ Latest Version
 
 The latest version of the sources can be found at the following locations:
 
-* https://github.com/mbasaglia/Qt-Color-Widgets
-* git://github.com/mbasaglia/Qt-Color-Widgets.git
+* https://gitlab.com/mattia.basaglia/Qt-Color-Widgets
+* git://gitlab.com/mattia.basaglia/Qt-Color-Widgets.git
 
 
 License
